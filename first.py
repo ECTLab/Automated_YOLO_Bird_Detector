@@ -5,6 +5,12 @@ import cv2
 import os
 import keyboard
 
+#The needed instructions for get the project running
+#Open command prompt and go to the directory that this file is there
+#Install the Numpy and CV2 libraries if needed.
+#Run the program with this command "python first.py -d the directory  -y yolo-coco
+#Change the confidence and threshold if needed too
+
 ap = argparse.ArgumentParser()
 ap.add_argument('-d','--directory',required=True,
 	help="base path directory of images")
@@ -16,11 +22,15 @@ ap.add_argument("-t", "--threshold", type=float, default=0.3,
 	help="threshold when applying non-maxima suppression")
 args = vars(ap.parse_args())
 
+#Adding the names files
+
 labelsPath = os.path.sep.join([args["yolo"], "coco.names"])
 LABELS = open(labelsPath).read().strip().split("\n")
 np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
 	dtype="uint8")
+
+#Adding the weights
 
 weightsPath = os.path.sep.join([args["yolo"], "yolov3.weights"])
 configPath = os.path.sep.join([args["yolo"], "yolov3.cfg"])
@@ -30,6 +40,9 @@ net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
 directory = f"C:/Users/ehsan/Desktop/project/{args['directory']}"
 run = True
 tmp = 0
+
+#Checking the addded picture if there is a bird in the picture
+
 while run:
 	time.sleep(2)
 	count_files = len(os.listdir(directory))
@@ -55,6 +68,8 @@ while run:
 			boxes = []
 			confidences = []
 			classIDs = []
+			
+			#Localization of the detected bird
 
 			for output in layerOutputs:
 				for detection in output:
@@ -72,6 +87,8 @@ while run:
 			idxs = cv2.dnn.NMSBoxes(boxes, confidences, args["confidence"],
 				args["threshold"])
 
+			#Giving the alarm if a bird is detected
+			
 			if len(idxs) > 0:
 				for i in idxs.flatten():
 					(x, y) = (boxes[i][0], boxes[i][1])
@@ -98,6 +115,7 @@ while run:
 			cv2.waitKey(0)
 			cv2.destroyAllWindows()
 			os.remove(path)
+	#How to stop the program just type the "p" character
 	elif count_files == 0:
 		if keyboard.read_key() == "p":
 			run = False
